@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHz Hearing - Listen to Any Frequency</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7b2fff, #ff006e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 3rem;
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .frequency-display {
+            font-size: 5rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #00d4ff;
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+            margin-bottom: 1rem;
+            transition: color 0.3s;
+        }
+
+        .unit {
+            font-size: 1.5rem;
+            color: #7b2fff;
+            margin-left: 0.3rem;
+        }
+
+        .slider-container {
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #00d4ff 0%, #7b2fff 50%, #ff006e 100%);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+        }
+
+        .presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .preset-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #888;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .play-btn {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .play-btn.start {
+            background: linear-gradient(135deg, #00d4ff, #7b2fff);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .play-btn.start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.4);
+        }
+
+        .play-btn.stop {
+            background: linear-gradient(135deg, #ff006e, #ff4d4d);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(255, 0, 110, 0.3);
+        }
+
+        .info {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info p {
+            color: #555;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .info strong {
+            color: #7b2fff;
+        }
+
+        .visualizer {
+            margin-top: 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .bar {
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to top, #00d4ff, #7b2fff);
+            border-radius: 2px;
+            transition: height 0.1s;
+        }
+
+        @media (max-width: 500px) {
+            h1 { font-size: 2rem; }
+            .frequency-display { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GHz</h1>
+        <p class="subtitle">Hearing</p>
+
+        <div class="frequency-display">
+            <span id="freq-value">440</span><span class="unit">Hz</span>
+        </div>
+
+        <div class="slider-container">
+            <input type="range" id="freq-slider" min="20" max="20000" value="440" step="1">
+        </div>
+
+        <div class="presets">
+            <button class="preset-btn" data-freq="20">20 Hz (Bass)</button>
+            <button class="preset-btn" data-freq="100">100 Hz</button>
+            <button class="preset-btn" data-freq="440">440 Hz (A4)</button>
+            <button class="preset-btn" data-freq="1000">1 kHz</button>
+            <button class="preset-btn" data-freq="10000">10 kHz</button>
+            <button class="preset-btn" data-freq="18000">18 kHz</button>
+            <button class="preset-btn" data-freq="1000000">1 MHz</button>
+            <button class="preset-btn" data-freq="1000000000">1 GHz</button>
+        </div>
+
+        <div class="controls">
+            <button class="play-btn start" id="play-btn">Play</button>
+        </div>
+
+        <div class="visualizer" id="visualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+
+        <div class="info">
+            <p><strong>Human hearing range:</strong> 20 Hz – 20,000 Hz (20 kHz)</p>
+            <p style="margin-top: 10px;">Frequencies above 20 kHz are inaudible but can be visualized. Below 20 Hz is <strong>infrasound</strong>.</p>
+        </div>
+    </div>
+
+    <script>
+        let audioContext = null;
+        let oscillator = null;
+        let gainNode = null;
+        let isPlaying = false;
+        let animationId = null;
+
+        const freqSlider = document.getElementById('freq-slider');
+        const freqValue = document.getElementById('freq-value');
+        const unitDisplay = document.querySelector('.unit');
+        const playBtn = document.getElementById('play-btn');
+        const visualizerBars = document.querySelectorAll('.bar');
+
+        function formatFrequency(freq) {
+            if (freq >= 1000000000) {
+                return (freq / 1000000000).toFixed(2) + ' GHz';
+            } else if (freq >= 1000000) {
+                return (freq / 1000000).toFixed(2) + ' MHz';
+            } else if (freq >= 1000) {
+                return (freq / 1000).toFixed(2) + ' kHz';
+            } else {
+                return freq + ' Hz';
+            }
+        }
+
+        function updateDisplay(freq) {
+            if (freq >= 1000) {
+                const value = freq >= 1000000000 ? (freq / 1000000000).toFixed(2) : 
+                              freq >= 1000000 ? (freq / 1000000).toFixed(2) :
+                              (freq / 1000).toFixed(2);
+                const unit = freq >= 1000000000 ? 'GHz' : freq >= 1000000 ? 'MHz' : 'kHz';
+                freqValue.textContent = value;
+                unitDisplay.textContent = unit;
+            } else {
+                freqValue.textContent = freq;
+                unitDisplay.textContent = 'Hz';
+            }
+        }
+
+        freqSlider.addEventListener('input', (e) => {
+            const freq = parseInt(e.target.value);
+            updateDisplay(freq);
+            
+            if (isPlaying && oscillator) {
+                oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            }
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const freq = parseInt(btn.dataset.freq);
+                freqSlider.value = freq;
+                updateDisplay(freq);
+                
+                if (isPlaying && oscillator) {
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                }
+            });
+        });
+
+        function animateVisualizer() {
+            if (!isPlaying) return;
+            
+            visualizerBars.forEach((bar, i) => {
+                const height = Math.random() * 40 + 10;
+                bar.style.height = height + 'px';
+            });
+            
+            animationId = requestAnimationFrame(animateVisualizer);
+        }
+
+        function startAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            const freq = parseInt(freqSlider.value);
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+            oscillator.start();
+            isPlaying = true;
+            
+            playBtn.textContent = 'Stop';
+            playBtn.classList.remove('start');
+            playBtn.classList.add('stop');
+            
+            animateVisualizer();
+        }
+
+        function stopAudio() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator.disconnect();
+                oscillator = null;
+            }
+            
+            if (gainNode) {
+                gainNode.disconnect();
+                gainNode = null;
+            }
+            
+            isPlaying = false;
+            cancelAnimationFrame(animationId);
+            
+            playBtn.textContent = 'Play';
+            playBtn.classList.remove('stop');
+            playBtn.classList.add('start');
+            
+            visualizerBars.forEach(bar => bar.style.height = '20px');
+        }
+
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                stopAudio();
+            } else {
+                startAudio();
+            }
+        });
+
+        // Set initial display
+        updateDisplay(440);
+    </script>
+</body>
+</html>
